@@ -139,6 +139,7 @@ public class GeometryJSON {
 		return arrCoords;
 	}
 
+
 	public static JSONArray toJSON(Coordinate[] coords, boolean includeElevation)
 	{
 		int size = coords.length;

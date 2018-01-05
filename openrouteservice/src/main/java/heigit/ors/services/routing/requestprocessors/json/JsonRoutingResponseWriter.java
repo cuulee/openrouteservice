@@ -23,6 +23,7 @@ package heigit.ors.services.routing.requestprocessors.json;
 import com.graphhopper.util.Helper;
 import com.graphhopper.util.shapes.BBox;
 import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Geometry;
 import heigit.ors.common.DistanceUnit;
 import heigit.ors.geojson.GeometryJSON;
 import heigit.ors.routing.ExtraSummaryItem;
@@ -111,9 +112,11 @@ public class JsonRoutingResponseWriter {
 	}
 
 
-	public static JSONObject toGeoJson(RoutingRequest request, RouteResult[] routeResult) throws Exception
+	public static GeometryJSON toGeoJson(RoutingRequest request, RouteResult[] routeResult) throws Exception
 	{
-		return null;
+        Coordinate[] route = routeResult[0].getGeometry();
+        JSONArray geometryJSON = GeometryJSON.toJSON(route, request.getIncludeElevation());
+	    return null;
 	}
 
 	public static JSONArray toJsonArray(RoutingRequest request, RouteResult[] routeResult, BBox bbox) throws Exception

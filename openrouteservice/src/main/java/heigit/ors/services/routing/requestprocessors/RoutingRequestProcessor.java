@@ -21,7 +21,11 @@
 package heigit.ors.services.routing.requestprocessors;
 
 import com.graphhopper.util.Helper;
+
+import com.vividsolutions.jts.geom.LineString;
 import heigit.ors.exceptions.EmptyElementException;
+
+
 import heigit.ors.routing.RouteResult;
 import heigit.ors.routing.RoutingErrorCodes;
 import heigit.ors.routing.RoutingProfileManager;
@@ -30,10 +34,15 @@ import heigit.ors.services.routing.requestprocessors.gpx.GpxRoutingResponseWrite
 import heigit.ors.services.routing.requestprocessors.json.JsonRoutingResponseWriter;
 import heigit.ors.servlet.http.AbstractHttpRequestProcessor;
 import heigit.ors.servlet.util.ServletUtility;
+
 import org.json.JSONObject;
+
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import heigit.ors.geojson.GeometryJSON;
+
 
 public class RoutingRequestProcessor extends AbstractHttpRequestProcessor {
 
@@ -60,7 +69,10 @@ public class RoutingRequestProcessor extends AbstractHttpRequestProcessor {
                 throw new EmptyElementException(RoutingErrorCodes.EMPTY_ELEMENT, "JSON was empty and therefore could not be created.");
             }
         } else if ("geojson".equalsIgnoreCase(respFormat)) {
-            json = JsonRoutingResponseWriter.toGeoJson(rreq, new RouteResult[]{result});
+            GeometryJSON.parse(json = JsonRoutingResponseWriter.toJson(rreq, new RouteResult[]{result}));
+            LineString lineString = GeometryJSON.readLineString(result.getGeometry();
+
+            //GeometryJSON geometryJSON = JsonRoutingResponseWriter.toGeoJson(rreq, new RouteResult[]{result});
             if (json != null){
             ServletUtility.write(response, json, "UTF-8");}
             else{
