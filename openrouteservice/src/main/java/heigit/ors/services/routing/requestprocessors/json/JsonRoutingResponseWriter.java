@@ -111,14 +111,6 @@ public class JsonRoutingResponseWriter {
 		return jResp;
 	}
 
-
-	public static GeometryJSON toGeoJson(RoutingRequest request, RouteResult[] routeResult) throws Exception
-	{
-        Coordinate[] route = routeResult[0].getGeometry();
-        JSONArray geometryJSON = GeometryJSON.toJSON(route, request.getIncludeElevation());
-	    return null;
-	}
-
 	public static JSONArray toJsonArray(RoutingRequest request, RouteResult[] routeResult, BBox bbox) throws Exception
 	{
 		StringBuffer buffer = new StringBuffer();

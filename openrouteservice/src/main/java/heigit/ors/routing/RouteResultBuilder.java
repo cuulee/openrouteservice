@@ -61,6 +61,14 @@ public class RouteResultBuilder
 		_distCalc = new DistanceCalcEarth();
 	}
 
+	/**
+	 * createRouteResult creates the desired route between two coordinates.
+	 * @param routes An {@link java.util.List<GHResponse>}of type GHResponse
+	 * @param request Holds the initial {@link RoutingRequest} from the user
+	 * @param extras Holds information of what {@link RouteExtraInfo} to include
+	 * @return Returns the {@link RouteResult}
+	 * @throws Exception
+	 */
 	public RouteResult createRouteResult(List<GHResponse> routes, RoutingRequest request, List<RouteExtraInfo> extras) throws Exception
 	{
 		RouteResult result = new RouteResult(request.getExtraInfo());
