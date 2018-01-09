@@ -93,7 +93,7 @@ public class RoutingRequestProcessor extends AbstractHttpRequestProcessor {
                 rreq.setGeometryFormat("geojson");
             }
             //Should be handled through GeoJsonResponseWriter.class
-            geojson = GeoJsonResponseWriter.toGeoJson(rreq,result);
+            geojson = GeoJsonResponseWriter.toGeoJson(rreq,new RouteResult[]{result});
 
 
 //            if (geojson != null){

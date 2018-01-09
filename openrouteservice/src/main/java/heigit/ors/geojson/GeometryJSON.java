@@ -20,7 +20,7 @@
  */
 package heigit.ors.geojson;
 
-import heigit.ors.routing.RouteResult;
+import org.geotools.geojson.GeoJSON;
 import org.geotools.geometry.jts.coordinatesequence.CoordinateSequences;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -39,10 +39,10 @@ import com.vividsolutions.jts.geom.Polygon;
 
 import heigit.ors.util.FormatUtility;
 
-/**
- * The purpose of GeometryJSON is to create the openrouteservice specific JSON format.
- * It is not an implementation of the "GeoJSON" format declared under rfc7946 by the IETF.
- */
+import java.io.StringWriter;
+import java.io.Writer;
+
+
 public class GeometryJSON {
 
     private final static int COORDINATE_PRECISION = 6;
@@ -278,8 +278,12 @@ public class GeometryJSON {
      * @param lineString Input must be a {@link LineString}
      * @return Returns a GeometryJSON as a well formatted {@link String}
      */
-    public static String toGeoJSON(LineString lineString) {
-        return null;
+    public static JSONObject toGeoJSON(LineString lineString) throws Exception {
+        // Create StringWriter to catch output of GeoJSON
+        Writer output = new StringWriter();
+        GeoJSON.write(lineString, output);
+        GeoJSON.write(lineString, new StringWriter());
+        return new JSONObject(output.toString());
     }
     // TODO: Integrate all geometry features into the class
 
