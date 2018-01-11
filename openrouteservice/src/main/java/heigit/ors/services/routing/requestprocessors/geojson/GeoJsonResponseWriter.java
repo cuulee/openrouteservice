@@ -1,16 +1,30 @@
 package heigit.ors.services.routing.requestprocessors.geojson;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.graphhopper.util.shapes.BBox;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
-import heigit.ors.config.AppConfig;
 import heigit.ors.routing.RouteResult;
 import heigit.ors.routing.RoutingRequest;
-import heigit.ors.services.routing.RoutingServiceSettings;
+import heigit.ors.services.optimization.requestprocessors.json.JsonOptimizationRequestProcessor;
+import heigit.ors.services.routing.requestprocessors.json.JsonRoutingResponseWriter;
 import org.geotools.feature.DefaultFeatureCollection;
-import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
-import org.geotools.referencing.crs.DefaultGeocentricCRS;
-import org.geotools.referencing.crs.DefaultGeographicCRS;
+import org.geotools.feature.FeatureCollection;
+import org.geotools.feature.simple.SimpleFeatureBuilder;
+import org.geotools.geojson.feature.FeatureCollectionHandler;
+import org.geotools.geojson.feature.FeatureJSON;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.json.JSONWriter;
+import org.json.simple.parser.JSONParser;
+import org.opengis.feature.simple.SimpleFeature;
+import org.opengis.feature.simple.SimpleFeatureType;
+
+import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 public class GeoJsonResponseWriter {
     private static RouteResult[] routeResults;
@@ -19,22 +33,52 @@ public class GeoJsonResponseWriter {
     public static String toGeoJson(RoutingRequest rreq, RouteResult[] routeResults) throws Exception {
         GeoJsonResponseWriter.routeResults = routeResults;
         GeoJsonResponseWriter.request = rreq;
+        // The GEOJSON Tool cant handle the JSONArray's properly and malformes them
+        // So the RouteResult properties are stored in a HashMap with its id as an identifier
+        // The values are added later
+        HashMap<String, List<JSONArray>> featurePropertiesMap= new HashMap<>();
+        // create GeometryFactory for reuse purposes
         GeometryFactory geometryFactory = new GeometryFactory();
-        // GeometryJSON.parse(json = JsonRoutingResponseWriter.toJson(rreq, new RouteResult[]{result}));
-        DefaultFeatureCollection featureCollection = new DefaultFeatureCollection();
+        // TODO: create FeatureCollection to add the single SimpleFeature's recursively
+        FeatureCollectionHandler featureCollectionHandler = new FeatureCollectionHandler();
+        // Create a new SimpleFeatureType to create a SimpleFeature from it
+        // its written capital because a custom SimpleFeatureType is a static and immutable object
+        SimpleFeatureType ROUTINGFEATURETYPE = FeatureParser.createRouteFeatureType(rreq);
+        DefaultFeatureCollection defaultFeatureCollection = new DefaultFeatureCollection("routing", ROUTINGFEATURETYPE);
+        JSONObject temporaryJsonRoute = JsonRoutingResponseWriter.toJson(request, routeResults);
+        SimpleFeature routingFeature = null;
         for (RouteResult route : routeResults) {
-            // Get the calculated route as linestring
+            List<JSONArray> featureProperties = new ArrayList<>();
+            // Get the route as LineString
             LineString lineString = geometryFactory.createLineString(route.getGeometry());
-            // Add the LineString to a Feature and add additional information
-            SimpleFeatureTypeBuilder feature = createFeature(lineString, route);
-
-
-
-
-
+            // Create a SimpleFeature from the ROUTINGFEATURETYPE template
+            SimpleFeatureBuilder routingFeatureBuilder = new SimpleFeatureBuilder(ROUTINGFEATURETYPE);
+            // Add content to the SimpleFeature
+            //Geometry
+            routingFeatureBuilder.set("geometry", lineString);
+            // BBox
+            routingFeatureBuilder.set("bbox", temporaryJsonRoute.getJSONArray("routes").getJSONObject(0).getJSONArray("bbox"));
+            //Way Points
+            routingFeatureBuilder.set("way_points",temporaryJsonRoute.getJSONArray("routes").getJSONObject(0).getJSONArray("way_points"));
+            // Segments
+            routingFeatureBuilder.set("segments", temporaryJsonRoute.getJSONArray("routes").getJSONObject(0).getJSONArray("segments"));
+            //routingFeature.set("segments", );
+            routingFeature = routingFeatureBuilder.buildFeature(null);
+            defaultFeatureCollection.add(routingFeature);
+            // TODO get the values in the featureProperties List and remove them from the routingFeatureBuilder first, add them later -->
+            featurePropertiesMap.put(routingFeature.getID(), featureProperties);
             /* // Convert the linestring to handy JSONObject to edit it easier
             JSONObject pureGeoJson = GeometryJSON.toGeoJSON(lineString);*/
         }
+        FeatureJSON fjson = new FeatureJSON();
+        StringWriter stringWriter = new StringWriter();
+        fjson.writeFeature(routingFeature, stringWriter);
+        JSONParser parser = new JSONParser();
+        JSONObject jsonObject = new JSONObject(stringWriter.toString());
+        org.json.simple.JSONObject json = (org.json.simple.JSONObject) parser.parse(stringWriter.toString());
+
+        //String json = stringWriter.toString();
+        System.out.print(stringWriter);
 
         // LineString lineString = jsonTest.readLine(reader);
         // Integrate creation of GeoJSONs into GeometryJSON.class. Can be done for each object to provide generified conversions
@@ -50,30 +94,8 @@ public class GeoJsonResponseWriter {
 
     }
 
-    private static SimpleFeatureTypeBuilder createFeature(LineString lineString, RouteResult route) {
-        SimpleFeatureTypeBuilder feature = new SimpleFeatureTypeBuilder();
-        // set the name
-        feature.setName(RoutingServiceSettings.getParameter("routing_name"));
-        // check for elevation and if found set WGS84_3D
-        if (request.getIncludeElevation()) {
-            // add geometry and crs
-            feature.setCRS(DefaultGeographicCRS.WGS84_3D);
-            feature.add("route", LineString.class);
-        } else {
-            // add geometry and crs
-            feature.setCRS(DefaultGeographicCRS.WGS84);
-            // TODO find out how to put the actual LineString object inside
-            feature.add("route", LineString.class);
-        }
 
-        // set the URI for author purposes
-        feature.setNamespaceURI(AppConfig.Global().getParameter("info", "base_url"));
-        feature.add("bbox", BBox.class);
-        feature.setDefaultGeometry(lineString.getCoordinates().toString());
-        return null;
-    }
-
-    private String addFeatureClassInformation() {
+    private SimpleFeatureType createSimpleFeatureType() {
 
         return null;
     }
