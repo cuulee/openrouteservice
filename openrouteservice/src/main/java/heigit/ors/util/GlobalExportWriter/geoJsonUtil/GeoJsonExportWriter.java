@@ -1,4 +1,4 @@
-package heigit.ors.util.geoJsonUtil;
+package heigit.ors.util.GlobalExportWriter.geoJsonUtil;
 
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Point;
@@ -7,10 +7,10 @@ import org.json.JSONObject;
 import java.io.StringWriter;
 import java.io.Writer;
 
-public class GeoJSON {
+public class GeoJsonExportWriter {
     /**
      * *Not implemented yet*
-     * This function creates a Point-GeoJSON
+     * This function creates a Point-GeoJsonExportWriter
      *
      * @param point Input must be a {@link Point}
      * @return Returns a GeometryJSON as a well formatted {@link String}
@@ -21,13 +21,13 @@ public class GeoJSON {
 
     /**
      * *Not implemented yet*
-     * This function creates a Line-GeoJSON
+     * This function creates a Line-GeoJsonExportWriter
      *
      * @param lineString Input must be a {@link LineString}
      * @return Returns a GeometryJSON as a well formatted {@link String}
      */
     public static JSONObject toGeoJSON(LineString lineString) throws Exception {
-        // Create StringWriter to catch output of GeoJSON
+        // Create StringWriter to catch output of GeoJsonExportWriter
         Writer output = new StringWriter();
         org.geotools.geojson.GeoJSON.write(lineString, output);
         org.geotools.geojson.GeoJSON.write(lineString, new StringWriter());

@@ -30,7 +30,7 @@ public class GeoJsonResponseWriter {
     private static RoutingRequest request;
 
     public static String toGeoJson(Object rreq, RouteResult[] routeResults) throws Exception {
-        // Check if rreq is instanceof RoutingRequest --> If so calculate the GeoJSON output
+        // Check if rreq is instanceof RoutingRequest --> If so calculate the GeoJsonExportWriter output
         // TODO Add different rreq types here
         if (rreq instanceof RoutingRequest){
             GeoJsonResponseWriter.request = (RoutingRequest) rreq;
